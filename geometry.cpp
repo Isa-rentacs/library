@@ -16,14 +16,13 @@ namespace std{
 
 //2つのベクトルの外積axb
 double cross(const P &a, const P &b){
-    return iamg(conj(a)*b);
+    return imag(conj(a)*b);
 }
 
 //2つのベクトルの内積(a,b)
-double dor(const P &a, const P &b){
+double dot(const P &a, const P &b){
     return real(conj(a) * b);
 }
-
 
 //線分は点のvectorで表す
 struct L : public vector<P> {
@@ -54,7 +53,6 @@ int ccw(P a, P b, P c) {
 }
 
 //is intersected including on a point, the same line
-
 //line and line
 bool intersectLL(const L &l, const L &m) {
     return abs(cross(l[1]-l[0], m[1]-m[0])) > EPS || // non-parallel
@@ -81,4 +79,18 @@ bool intersectSS(const L &s, const L &t) {
 //segment and point
 bool intersectSP(const L &s, const P &p) {
     return abs(s[0]-p)+abs(s[1]-p)-abs(s[1]-s[0]) < EPS; // triangle inequality
+}
+
+//凸包を求める
+//引数は3点以上含むことを仮定する
+vector<P> convex_hull(vector<P> ps) {
+    int n = ps.size(), k = 0;
+    sort(ps.begin(), ps.end());
+    vector<P> ch(2*n);
+    for (int i = 0; i < n; ch[k++] = ps[i++]) // lower-hull
+        while (k >= 2 && ccw(ch[k-2], ch[k-1], ps[i]) <= 0) --k;
+    for (int i = n-2, t = k+1; i >= 0; ch[k++] = ps[i--]) // upper-hull
+        while (k >= t && ccw(ch[k-2], ch[k-1], ps[i]) <= 0) --k;
+    ch.resize(k-1);
+    return ch;
 }
