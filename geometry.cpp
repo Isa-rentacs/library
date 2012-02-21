@@ -9,7 +9,7 @@ typedef complex<double> P;
 namespace std{
     //頂点同士の比較演算子をnamespace stdに追加
     //x軸の大小関係を優先する
-    bool operator < (const P &a, const P &b){
+    const bool operator < (const P &a, const P &b)const {
         return real(a) != real(b) ? real(a) < real (b) : imag(a) < imag(b);
     }
 }
@@ -93,4 +93,20 @@ vector<P> convex_hull(vector<P> ps) {
         while (k >= t && ccw(ch[k-2], ch[k-1], ps[i]) <= 0) --k;
     ch.resize(k-1);
     return ch;
+}
+
+//多角形の包含判定
+#define curr(G, i) G[i]
+#define next(G, i) G[(i+1)%G.size()]
+enum { OUT, ON, IN };
+int contains(const G &g, const P &p) {
+    bool in = false;
+    for (int i = 0; i < g.size(); ++i) {
+        point a = curr(g,i) - p, b = next(g,i) - p;
+        if (imag(a) > imag(b)) swap(a, b);
+        if (imag(a) <= 0 && 0 < imag(b))
+            if (cross(a, b) < 0) in = !in;
+        if (cross(a, b) == 0 && dot(a, b) <= 0) return ON;
+    }
+    return in ? IN : OUT;
 }
